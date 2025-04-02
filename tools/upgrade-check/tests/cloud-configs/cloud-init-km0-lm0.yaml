@@ -1,0 +1,37 @@
+package_update: true
+package_upgrade: true
+
+write_files:
+  # Create a script to run after reboot
+  - path: /usr/local/bin/post-reboot.sh
+    permissions: '0755'
+    content: |
+      #!/bin/bash
+      # Continue running commands after reboot
+      /usr/local/bin/select-kernel.sh 0
+      /usr/local/bin/select-amlfs.sh 0
+      # Clean up to prevent re-execution
+      rm -f /usr/local/bin/post-reboot.sh
+      # Reboot again if necessary
+      reboot
+
+runcmd:
+  # Download the scripts from a remote location
+
+  # BEFORE PR REPLACE URLS
+  # https://raw.githubusrcontent.com/microsoft/amlFilesystem-tools/refs/heads/main/tools/upgrade-check/tests/
+  - curl -o /usr/local/bin/select-kernel.sh https://raw.githubusercontent.com/jeffbearer/amlFilesystem-tools/refs/heads/personal/jebearer/update-checker-testing/tools/upgrade-check/tests/select-kernel.sh
+  - curl -o /usr/local/bin/select-amlfs.sh https://raw.githubusercontent.com/jeffbearer/amlFilesystem-tools/refs/heads/personal/jebearer/update-checker-testing/tools/upgrade-check/tests/select-amlfs.sh
+  - curl -o /usr/local/bin/upgrade-check.sh https://raw.githubusercontent.com/jeffbearer/amlFilesystem-tools/refs/heads/personal/jebearer/update-checker-testing/tools/upgrade-check/upgrade-check.sh
+
+  # Make the scripts executable
+  - chmod +x /usr/local/bin/select-kernel.sh
+  - chmod +x /usr/local/bin/select-amlfs.sh
+  - chmod +x /usr/local/bin/upgrade-check.sh
+
+  # Install the Azure LTS kernel
+  - apt-get install -y linux-azure-lts-22.04
+  - apt-get remove -y linux-azure
+
+  # Reboot the system to apply the new kernel
+  - reboot

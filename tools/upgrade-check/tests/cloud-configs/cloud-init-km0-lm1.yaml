@@ -1,0 +1,20 @@
+package_update: false
+package_upgrade: false
+
+runcmd:
+  # Download the scripts from a remote location
+  - curl -o /usr/local/bin/select-kernel.sh https://raw.githubusercontent.com/microsoft/amlFilesystem-tools/refs/heads/main/tools/upgrade-check/tests/select-kernel.sh
+  - curl -o /usr/local/bin/select-amlfs.sh https://raw.githubusercontent.com/microsoft/amlFilesystem-tools/refs/heads/main/tools/upgrade-check/tests/select-amlfs.sh
+  - curl -0 /usr/local/bin/upgrade-check.sh https://raw.githubusercontent.com/microsoft/amlFilesystem-tools/refs/heads/main/tools/upgrade-check/upgrade-check.sh
+
+  # Make the scripts executable
+  - chmod +x /usr/local/bin/select-kernel.sh
+  - chmod +x /usr/local/bin/select-amlfs.sh
+  - chmod +x /usr/local/bin/upgrade-check.sh
+
+  # Run the scripts to install the previous kernel and amlfs
+  - /usr/local/bin/select-kernel.sh 0
+  - /usr/local/bin/select-amlfs.sh 1
+
+  # Reboot the system to apply changes
+  - reboot
